@@ -100,10 +100,6 @@
   text-decoration: none;
 }
 
-.contact-item a:hover {
-  text-decoration: underline;
-}
-
 .navbar-menu {
   display: flex;
   justify-content: space-between;
