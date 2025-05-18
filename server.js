@@ -12,13 +12,20 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use(express.json());
-app.use(cors());
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 
+app.use(express.json());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/a2developers')
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 const demoRequestSchema = new mongoose.Schema({
   name: {
@@ -58,17 +65,14 @@ app.post('/api/submit-demo-request', async (req, res) => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('dist'));
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+  app.use(express.static(path.join(__dirname, 'dist')));
+  
+  app.get(/^(?!\/api\/).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 }
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
-});
-// Add this route to your server.js
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
 });
